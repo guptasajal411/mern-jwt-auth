@@ -1,9 +1,10 @@
 import React, { useState } from 'react'
 
-export default function Login() {
+export default function Register() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isFetching, setIsFetching] = useState(false);
+    const [responseMessage, setResponseMessage] = useState("");
 
     async function submitLoginForm(event) {
         event.preventDefault();
@@ -16,8 +17,13 @@ export default function Login() {
             body: JSON.stringify({
                 email, password
             })
+        })
+        .then(response => response.json())
+        .then(jsondata => {
+            console.log(jsondata.message);
+            setIsFetching(false);
+            setResponseMessage(jsondata.message);
         });
-        console.log(response);
     }
 
     return (
@@ -39,9 +45,10 @@ export default function Login() {
                     placeholder="Password"
                 />
                 <br />
-                <button type="submit">
-                    {isFetching ? <p>Submitting...</p> : <p>Submit</p>}
+                <button type="submit" disabled={isFetching}>
+                    {isFetching ? <p>Logging you in...</p> : <p>Login</p>}
                 </button>
+                <p>{responseMessage}</p>
             </form>
         </div>
     )
