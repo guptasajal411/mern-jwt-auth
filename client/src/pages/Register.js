@@ -4,9 +4,12 @@ export default function Register() {
     const [username, setUsername] = useState("");
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [isFetching, setIsFetching] = useState(false);
+    const [responseMessage, setResponseMessage] = useState("");
 
     async function submitRegisterForm(event) {
         event.preventDefault();
+        setIsFetching(true);
         const response = await fetch("http://localhost:3001/register", {
             method: "POST",
             headers: {
@@ -15,9 +18,13 @@ export default function Register() {
             body: JSON.stringify({
                 username, email, password
             })
+        })
+        .then(response => response.json())
+        .then(jsondata => {
+            console.log(jsondata.message);
+            setIsFetching(false);
+            setResponseMessage(jsondata.message);
         });
-        const data = await response;
-        console.log(data);
     }
 
     return (
@@ -46,7 +53,10 @@ export default function Register() {
                     placeholder="Password"
                 />
                 <br />
-                <button type="submit">Submit</button>
+                <button type="submit" disabled={isFetching}>
+                    {isFetching ? <p>Submitting...</p> : <p>Submit</p>}
+                </button>
+                <p>{responseMessage}</p>
             </form>
         </div>
     )
