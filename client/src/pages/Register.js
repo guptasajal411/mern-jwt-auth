@@ -6,6 +6,7 @@ export default function Register() {
     const [password, setPassword] = useState("");
     const [isFetching, setIsFetching] = useState(false);
     const [responseMessage, setResponseMessage] = useState("");
+    const [isError, setIsError] = useState(true);
 
     async function submitRegisterForm(event) {
         event.preventDefault();
@@ -21,8 +22,13 @@ export default function Register() {
         })
         .then(response => response.json())
         .then(jsondata => {
-            console.log(jsondata.message);
+            console.log(jsondata);
             setIsFetching(false);
+            if (jsondata.status === "ok"){
+                setIsError(false);
+            } else {
+                setIsError(true);
+            }
             setResponseMessage(jsondata.message);
         });
     }
@@ -56,7 +62,7 @@ export default function Register() {
                 <button type="submit" disabled={isFetching}>
                     {isFetching ? <p>Submitting...</p> : <p>Submit</p>}
                 </button>
-                <p>{responseMessage}</p>
+                <p style={{ color:  isError ? "red" : "green" }}>{responseMessage}</p>
             </form>
         </div>
     )
