@@ -10,7 +10,7 @@ export default function Register() {
     async function submitLoginForm(event) {
         event.preventDefault();
         setIsFetching(true);
-        const response = await fetch("http://localhost:3001/login", {
+        await fetch("http://localhost:3001/login", {
             method: "POST",
             headers: {
                 "content-type": "application/json"
@@ -19,25 +19,29 @@ export default function Register() {
                 email, password
             })
         })
-        .then(response => response.json())
-        .then(jsondata => {
-            console.log(jsondata);
-            if (jsondata.token){
-                setIsFetching(false);
-                // json web token exists, so login is successful
-                setIsError(false);
-                setResponseMessage(jsondata.message);
-                // successful login redirects to success page
-                setTimeout(() => {
-                    window.location.replace("/success");
-                }, 1500);
-            } else {
-                setIsFetching(false);
-                // json web token does not exist, so login is unsuccessful
-                setIsError(true);
-                setResponseMessage(jsondata.message);
-            }
-        });
+            .then(response => response.json())
+            .then(jsondata => {
+                console.log(jsondata);
+                if (jsondata.token) {
+                    // add json web token to local storage
+                    localStorage.setItem("token", jsondata.token);
+                    setIsFetching(false);
+                    // json web token exists, so login is successful
+                    setIsError(false);
+                    setResponseMessage(jsondata.message);
+                    // successful login redirects to success page
+                    setTimeout(() => {
+                        window.location.replace("/success");
+                    }, 1500);
+                } else {
+                    setIsFetching(false);
+                    // json web token does not exist, so login is unsuccessful
+                    // delete pre-existing json web token, if exists
+                    localStorage.removeItem("token");
+                    setIsError(true);
+                    setResponseMessage(jsondata.message);
+                }
+            });
     }
 
     return (
@@ -62,7 +66,7 @@ export default function Register() {
                 <button type="submit" disabled={isFetching}>
                     {isFetching ? <p>Logging you in...</p> : <p>Login</p>}
                 </button>
-                <p style={{ color:  isError ? "red" : "green" }}>{responseMessage}</p>
+                <p style={{ color: isError ? "red" : "green" }}>{responseMessage}</p>
             </form>
         </div>
     )

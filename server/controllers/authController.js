@@ -13,7 +13,8 @@ exports.postRegister = (req, res) => {
                     const newUser = new User({
                         username: req.body.username,
                         email: req.body.email,
-                        password: hash
+                        password: hash,
+                        message: "this message is coming from database after validating the unique JSON web token signed for this account on this browser."
                     });
                     await newUser.save();
                     res.status(200).send({ status: "ok", message: "Registered successfully." });
@@ -44,6 +45,25 @@ exports.postLogin = (req, res) => {
         } else {
             // email not found, please register
             res.status(200).send({ status: "error", message: "User not found. Try registering." });
+        }
+    });
+}
+
+exports.postVerify = (req, res) => {
+    const token = req.headers["x-access-token"];
+    jwt.verify(token, process.env.TOKEN_SIGN_KEY, (err, decoded) => {
+        if (decoded){
+            // incoming token is a valid token, now check if it exists in db
+            User.findOne({ email: decoded.email }, (err, user) => {
+                if (user) {
+                    res.status(200).send({ status: "ok", message: user.message });
+                } else if (err) {
+                    res.status(501).send({ status: "error", message: "JSON web token is valid but user not found in database." });
+                }
+            });
+        } else {
+            // incoming token is not a valid token
+            res.status(501).send({ status: "error", message: "JSON web token is invalid." });
         }
     });
 }

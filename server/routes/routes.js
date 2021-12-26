@@ -14,4 +14,8 @@ app
     .route("/login")
     .post(authController.postLogin);
 
+app
+    .route("/verify")
+    .post(authController.postVerify);
+
 module.exports = app;
