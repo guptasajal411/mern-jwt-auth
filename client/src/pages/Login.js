@@ -22,13 +22,21 @@ export default function Register() {
         .then(response => response.json())
         .then(jsondata => {
             console.log(jsondata);
-            setIsFetching(false);
-            if (jsondata.status === "ok"){
+            if (jsondata.token){
+                setIsFetching(false);
+                // json web token exists, so login is successful
                 setIsError(false);
+                setResponseMessage(jsondata.message);
+                // successful login redirects to success page
+                setTimeout(() => {
+                    window.location.replace("/success");
+                }, 1500);
             } else {
+                setIsFetching(false);
+                // json web token does not exist, so login is unsuccessful
                 setIsError(true);
+                setResponseMessage(jsondata.message);
             }
-            setResponseMessage(jsondata.message);
         });
     }
 

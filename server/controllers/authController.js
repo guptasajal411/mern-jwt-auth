@@ -1,6 +1,7 @@
 const userModel = require("../models/userModel");
 const bcrypt = require("bcryptjs");
 const User = require("../models/userModel");
+const jwt = require("jsonwebtoken");
 
 exports.postRegister = (req, res) => {
     User.findOne({ email: req.body.email }, (err, foundUser) => {
@@ -28,11 +29,13 @@ exports.postRegister = (req, res) => {
 exports.postLogin = (req, res) => {
     User.findOne({ email: req.body.email }, (err, foundUser) => {
         if (foundUser) {
-            // email found, now compare password
+            // user found, now compare password
             bcrypt.compare(req.body.password, foundUser.password, (err, response) => {
                 if (response) {
+                    // create json web token
+                    const token = jwt.sign({ email: req.body.email }, process.env.TOKEN_SIGN_KEY);
                     // response === true
-                    res.status(200).send({ status: "ok", message: "Login successful." });
+                    res.status(200).send({ status: "ok", message: "Login successful, redirecting...", token });
                 } else {
                     // response === false
                     res.status(200).send({ status: "error", message: "Wrong password. Please try again." });
